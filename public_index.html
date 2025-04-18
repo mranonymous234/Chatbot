@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DeepSeek Chat App</title>
+    <style>
+        body { font-family: Arial; background: #f0f0f0; }
+        #chat { background: #fff; width: 400px; margin: 50px auto; border-radius: 8px; box-shadow: 0 0 10px #ccc; padding: 20px; }
+        #messages { height: 300px; overflow-y: auto; border: 1px solid #ddd; margin-bottom: 10px; padding: 10px; }
+        .msg { margin: 8px 0; }
+        .user { color: #333; }
+        .bot { color: #0078D7; }
+    </style>
+</head>
+<body>
+<div id="chat">
+    <div id="messages"></div>
+    <form id="chatForm">
+        <input type="text" id="userInput" autocomplete="off" style="width: 80%;" />
+        <button type="submit">Send</button>
+    </form>
+</div>
+<script>
+    const chatForm = document.getElementById('chatForm');
+    const userInput = document.getElementById('userInput');
+    const messagesDiv = document.getElementById('messages');
+    let chatHistory = [];
+
+    function addMessage(role, content) {
+        const div = document.createElement('div');
+        div.className = 'msg ' + role;
+        div.innerHTML = `<strong>${role === 'user' ? 'You' : 'Bot'}:</strong> ${content}`;
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = userInput.value.trim();
+        if (!message) return;
+        addMessage('user', message);
+        chatHistory.push({ role: 'user', content: message });
+        userInput.value = '';
+
+        addMessage('bot', '...');
+        const botMsgDiv = messagesDiv.lastChild;
+
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: chatHistory }),
+            });
+            const data = await res.json();
+            const botReply = data.choices?.[0]?.message?.content || "Error: No response";
+            chatHistory.push({ role: 'assistant', content: botReply });
+            botMsgDiv.innerHTML = `<strong>Bot:</strong> ${botReply}`;
+        } catch (err) {
+            botMsgDiv.innerHTML = `<strong>Bot:</strong> Error: ${err.message}`;
+        }
+    });
+</script>
+</body>
+</html>
