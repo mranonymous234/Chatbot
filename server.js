@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const cors = require('cors');
 
-const DEEPSEEK_API_KEY = "r1";
+const DEEPSEEK_API_KEY = "sk-0e9d37027edc440482a0c911d26dd5e8";
 const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"; // Example endpoint
 
 const app = express();
